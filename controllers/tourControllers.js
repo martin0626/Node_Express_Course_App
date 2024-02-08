@@ -5,6 +5,21 @@ const fs = require('fs');
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`));
 
 
+exports.checkId = (req, res, next, val)=>{
+    const tour = tours.filter(t=> {return t.id == val});
+    
+    if(tour.length === 0){
+        return res.status(404).json({
+            status: "Not found",
+            message: "Invalid ID",
+        })
+    }
+
+    next();
+
+}
+
+
 exports.getAllTours = (req, res)=>{
     console.log(req.addedProp);
     res.status(200).json({
@@ -15,20 +30,12 @@ exports.getAllTours = (req, res)=>{
 };
 
 exports.getSingleTour = (req, res)=>{
-    let params = req.params;
-    let tour = tours.filter((t)=>{return t.id == params.id})
     
-    tour.length > 0 
-    ?
+    const tour = tours.filter(t=>{return req.params.id == t.id})
     res.status(200).json({
         status: "Success",
         results: tour,
     }) 
-    :
-    res.status(404).json({
-        status: "Not found",
-        message: "Invalid ID",
-    })
 };
 
 exports.createTour = (req, res)=>{
@@ -50,36 +57,15 @@ exports.createTour = (req, res)=>{
 
 
 exports.updateTour = (req, res)=>{
-    let params = req.params;
-    let tour = tours.filter((t)=>{return t.id == params.id})
-    
-    tour.length > 0 
-    ?
     res.status(200).json({
         status: "Success",
         results: "Updated Tour Here",
     }) 
-    :
-    res.status(404).json({
-        status: "Not found",
-        message: "Invalid ID",
-    })
 };
 
 exports.deleteTour = (req, res)=>{
-    let params = req.params;
-    const toursLen = tours.length;
-    let newTours = tours.filter((t)=>{return t.id != params.id})
-    
-    newTours.length != toursLen
-    ?
     res.status(204).json({
         status: "Success",
         results: null,
     }) 
-    :
-    res.status(404).json({
-        status: "Not found",
-        message: "Invalid ID",
-    })
 };
