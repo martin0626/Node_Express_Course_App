@@ -8,6 +8,9 @@ const app = express();
 
 // Middleware for reading json body for post requests
 app.use(express.json());
+app.use(express.static(`${__dirname}/public`))
+
+
 // Custom Middleware:
 app.use((req, res, next)=>{
     console.log("Hello from middleware 👌❤️");

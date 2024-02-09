@@ -1,4 +1,5 @@
 const fs = require('fs');   
+const { nextTick } = require('process');
 
 
 //'tours-simple.json' with all tours
@@ -7,7 +8,7 @@ const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-si
 
 exports.checkId = (req, res, next, val)=>{
     const tour = tours.filter(t=> {return t.id == val});
-    
+
     if(tour.length === 0){
         return res.status(404).json({
             status: "Not found",
@@ -17,6 +18,18 @@ exports.checkId = (req, res, next, val)=>{
 
     next();
 
+}
+
+exports.checkTours = (req, res, next) =>{
+    let newTour = req.body;
+
+    if(!newTour.name || !newTour.difficulty){
+        return res.status(400).json({
+            status: "Bad request",
+            message: "Invalid name or difficulty"
+        })
+    }
+    next();
 }
 
 
@@ -39,7 +52,6 @@ exports.getSingleTour = (req, res)=>{
 };
 
 exports.createTour = (req, res)=>{
-    console.log(req.body);
     let newId = tours[tours.length - 1].id + 1;
     let newTour = Object.assign({id: newId}, req.body);
     tours.push(newTour);
