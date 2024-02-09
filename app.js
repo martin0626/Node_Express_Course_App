@@ -8,6 +8,7 @@ const app = express();
 
 // Middleware for reading json body for post requests
 app.use(express.json());
+// Middleware for reading static files
 app.use(express.static(`${__dirname}/public`))
 
 
