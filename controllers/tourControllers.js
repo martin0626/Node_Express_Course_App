@@ -92,7 +92,6 @@ exports.updateTour = async (req, res)=>{
 };
 
 exports.deleteTour = async (req, res)=>{
-
     try{
         const deletedTour = await Tour.findByIdAndDelete(req.params.id)
         
