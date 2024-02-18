@@ -3,7 +3,11 @@ const express = require("express");
 const controller = require('./../controllers/tourControllers')
 const router = express.Router();
 
-// router.param('id', controller.checkId)
+
+//Route to get first five most rated tours
+router.route('/top-5-cheap')
+    .get(controller.aliasTopTours, controller.getAllTours);
+
 
 //New routes
 router.route('/')
