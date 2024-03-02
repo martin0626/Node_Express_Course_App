@@ -10,6 +10,8 @@ router.route('/top-5-cheap')
 
 
 router.route('/tour-stats').get(controller.getStats)
+router.route('/monthly-plan/:year').get(controller.getMounthlyPlan)
+
 
 //New routes
 router.route('/')
