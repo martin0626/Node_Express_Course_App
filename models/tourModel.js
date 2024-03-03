@@ -15,6 +15,8 @@ const tourSchema = new mongoose.Schema({
             require: [true, "Tour must have name!"],
             unique: true,
             trim: true,
+            maxlength: [40, 'A tour must have less or equal then 40 symbols.'],
+            minlength: [10, 'A tour must have at least 10 symbols.']
         },
         slug: {
             type: String,
@@ -33,12 +35,18 @@ const tourSchema = new mongoose.Schema({
         },
         difficulty: {
             type: String,
-            require: [true, "Tour must have difficulty!"]
+            require: [true, "Tour must have difficulty!"],
+            enum:  {
+                values: ['easy', 'medium', 'difficult'],
+                message: 'Difficulty must be one of these: easy, medium or difficult!'
+            }
         },
 
         ratingAverage: {
             type: Number,
             default: 4.5,
+            maxlength: [5, 'Max rating possible is 5'],
+            minlength: [1, 'Min rating possible is 1']
         },
         ratingsQuantity: {
             type: Number,
@@ -51,7 +59,15 @@ const tourSchema = new mongoose.Schema({
 
         },
 
-        priceDiscount: Number,
+        priceDiscount: {
+            type: Number,
+            validate: {
+                validator: function(val){
+                    return val < this.price;
+                },
+                message: 'Discount value ({VALUE}) should be less than Price'
+            }
+        },
         summary:{
             type: String,
             trim: true,
@@ -95,6 +111,14 @@ tourSchema.pre(/^find/, function(next){
     this.find({secretTour: {$ne: true}});
     next();
 })
+
+
+// AGGREGATION MIDDLEWARE: Remove all secretTour = true, from aggregation statistics
+tourSchema.pre('aggregate', function(next){
+    this.pipeline().unshift({$match: { secretTour: { $ne: true }}})
+    next();
+})
+
 
 const Tour = mongoose.model('Tour', tourSchema);
 
