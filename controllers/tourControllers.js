@@ -4,7 +4,7 @@ const Tour = require('../models/tourModel');
 const { match } = require('assert');
 const APIFeatures = require('./../utils/apiFeatures')
 const catchAsync = require('./../utils/catchAsync')
-
+const AppError = require('../utils/appError')
 //Middleware to filter first five most rated Tours and sort them by price
 exports.aliasTopTours = function(req, res, next){
     req.query.limit = '5';
@@ -41,6 +41,11 @@ exports.getAllTours = catchAsync(async(req, res, next)=>{
 
 exports.getSingleTour = catchAsync(async (req, res, next)=>{
     const tour = await Tour.findById(req.params.id);
+
+    if(!tour) {
+        next(new AppError(`Tour with this ID is not found!`, 404))
+    }
+
     res.status(200).json({
         status: "Success",
         data: {
