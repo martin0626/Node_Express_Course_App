@@ -1,8 +1,17 @@
 const dotenv = require('dotenv');
 
+
+
+process.on('uncaughtException', err=>{
+    console.log(err.name, err.message);
+    console.log('UNHANDLED REJECTION! Shutting down...');
+
+    process.exit(1);
+})
+
+
 //Adding Enviroment Variables For config.env file
 dotenv.config({path: './config.env'})
-
 
 
 
@@ -20,5 +29,4 @@ process.on('unhandledRejection', err=>{
     server.close(()=>{
         process.exit(1);
     })
-
 })
