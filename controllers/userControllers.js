@@ -1,10 +1,14 @@
 const fs = require('fs');   
-
+const User = require('./../models/userModel');
+const catchAsync = require('./../utils/catchAsync')
 
 //'users.json' with all users
 const users = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/users.json`));
 
-exports.getAllUsers = (req, res)=>{
+exports.getAllUsers = catchAsync( async (req, res, next)=>{
+
+    const users = await User.find();
+
     res.status(200).json(
         {
             status: 'Success',
@@ -12,7 +16,7 @@ exports.getAllUsers = (req, res)=>{
             body: {users},
         }
     )
-}
+});
 
 
 exports.createUser = (req, res)=>{
