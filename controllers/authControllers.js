@@ -3,6 +3,9 @@ const {promisify} = require('util')
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync')
 const appError = require('./../utils/appError');
+const AppError = require('./../utils/appError');
+const sendEmail = require('./../utils/email');
+
 
 const createToken = (id)=>{
     return jwt.sign({id}, process.env.JWT_SECRET, {
@@ -15,6 +18,8 @@ exports.signup = catchAsync(async(req, res, next) =>{
         name: req.body.name,
         email: req.body.email,
         password: req.body.password,
+        //Not to let users to register as administrator
+        role: "user",
         passwordConfirm: req.body.passwordConfirm,
         passwordChangedAt: req.body.passwordChangedAt
     });
@@ -74,7 +79,6 @@ exports.protect = catchAsync( async(req, res, next) => {
 
 
     //Check if user exists.
-
     const currentUser = await User.findById(decoded.id);
 
     if (!currentUser) {
@@ -93,3 +97,63 @@ exports.protect = catchAsync( async(req, res, next) => {
 
     next()
 })
+
+
+exports.restrictTo = (...roles) => {
+    return (req, res, next)=>{
+        if(!roles.includes(req.user.role)){
+            return next(new AppError("You do not have permission to perform this action!", 403));
+        }
+
+        next();
+    }
+}
+
+
+exports.forgotPassword = catchAsync( async(req, res, next) => {
+    //Get user based on Email
+    let user = await User.findOne({email: req.body.email});
+
+    if(!user){
+        return next(new appError("Please provide valid email!", 404));
+    }
+
+    //Generate random reset token
+    let resetToken = user.createPasswordResetToken();
+    await user.save({ validateBeforeSave: false}); 
+
+    //Send it to user email
+    const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
+    const message = `In case you forgot your password, please follow the LINK:\n${resetURL}\nOtherwise just ignore this message.`;
+
+    try{
+        await sendEmail(
+            {
+                email: user.email,
+                subject: 'Your password reset link (Valid for 10 minutes!)',
+                message: message
+            }
+        )
+
+        res.status(200).json({
+            status: "Success",
+            message: "Token sent to email!"
+        });
+
+    }catch(err){
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+
+        await user.save({ validateBeforeSave: false}); 
+
+        next(new appError('Something went wrong with sending reset link, try again later!', 500))
+    }
+
+    
+
+    
+
+})
+
+
+exports.resetPassword = catchAsync(async(req, res, next)=> {});

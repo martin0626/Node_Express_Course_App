@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcryptjs = require("bcryptjs");
+const crypto = require("crypto");
 
 const userSchema = new mongoose.Schema({
 
@@ -23,6 +24,11 @@ const userSchema = new mongoose.Schema({
             message: 'Email: ({VALUE}) is not valid!'
         }
     },
+    role: {
+        type: String,
+        enum: ['admin', 'user', 'guide', 'lead-guide'],
+        default: 'user'
+    },
     photo: {
         type: String
     },
@@ -45,6 +51,12 @@ const userSchema = new mongoose.Schema({
     passwordChangedAt: {
         type: Date
     },
+    passwordResetToken: {
+        type: String
+    },
+    passwordResetExpires: {
+        type: Date
+    }
 })
 
 
@@ -76,6 +88,17 @@ userSchema.methods.changedPasswordAfter = function(JWTTimestamp){
     }
 
     return false;
+}
+
+
+userSchema.methods.createPasswordResetToken = function(){
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    this.passwordResetToken = crypto.createHash("sha256").update(resetToken).digest('hex');
+
+    this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+
+    return resetToken;
 }
 
 
