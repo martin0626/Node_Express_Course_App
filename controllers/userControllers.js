@@ -1,9 +1,21 @@
 const fs = require('fs');   
 const User = require('./../models/userModel');
-const catchAsync = require('./../utils/catchAsync')
+const catchAsync = require('./../utils/catchAsync');
+const AppError = require('../utils/appError');
+const { log } = require('console');
 
 //'users.json' with all users
 const users = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/users.json`));
+
+const filterAllowedForUpdate = (obj, ...allowedFields)=>{
+    const filteredObj = {};
+
+    Object.keys(obj).forEach(k=>{
+        if (allowedFields.includes(k)) filteredObj[k] = obj[k];
+    })
+
+    return filteredObj;
+}
 
 exports.getAllUsers = catchAsync( async (req, res, next)=>{
 
@@ -17,6 +29,40 @@ exports.getAllUsers = catchAsync( async (req, res, next)=>{
         }
     )
 });
+
+
+exports.updateUser = catchAsync( async(req, res, next)=>{
+    if(req.body.password || req.body.passwordConfirm){
+        return next(new AppError("Pssword can't be changed from here!", 400));
+    }
+
+    const filteredBody = filterAllowedForUpdate(req.body, 'name', 'email');
+    const updateUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
+        new: true,
+        runValidators: true
+    });
+
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            user: updateUser
+        }
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 exports.createUser = (req, res)=>{
@@ -55,22 +101,22 @@ exports.getSingleUser = (req, res)=>{
 };
 
 
-exports.updateUser = (req, res)=>{
-    let params = req.params;
-    let user = users.filter((t)=>{return t._id == params.id})
+// exports.updateUser = (req, res)=>{
+//     let params = req.params;
+//     let user = users.filter((t)=>{return t._id == params.id})
     
-    user.length > 0 
-    ?
-    res.status(200).json({
-        status: "Success",
-        results: "Updated user Here",
-    }) 
-    :
-    res.status(404).json({
-        status: "Not found",
-        message: "Invalid ID",
-    })
-};
+//     user.length > 0 
+//     ?
+//     res.status(200).json({
+//         status: "Success",
+//         results: "Updated user Here",
+//     }) 
+//     :
+//     res.status(404).json({
+//         status: "Not found",
+//         message: "Invalid ID",
+//     })
+// };
 
 
 exports.deleteUser = (req, res)=>{

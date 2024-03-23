@@ -5,19 +5,23 @@ const authController = require('./../controllers/authControllers')
 const router = express.Router();
 
 
+
+//Auth User Controllers
 router.post('/signup', authController.signup)
 router.post('/login', authController.login)
-
 router.post('/forgotPassword', authController.forgotPassword);
+router.patch('/resetPassword/:token', authController.resetPassword);
+router.patch('/changePassword', authController.updatePassword);
 
+//Users controllers
+router.patch('/updateUser', authController.protect, controller.updateUser);
 
 
 router.route('/')
     .get(controller.getAllUsers)
     .post(controller.createUser);
-router.route('/:id')
+router.route('/')
     .get(controller.getSingleUser)
-    .patch(controller.updateUser)
     .delete(controller.deleteUser);
 
 
