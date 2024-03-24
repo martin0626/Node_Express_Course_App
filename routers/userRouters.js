@@ -15,6 +15,8 @@ router.patch('/changePassword', authController.updatePassword);
 
 //Users controllers
 router.patch('/updateUser', authController.protect, controller.updateUser);
+router.patch('/deleteUser', authController.protect, controller.deleteUser);
+
 
 
 router.route('/')

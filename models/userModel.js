@@ -56,7 +56,20 @@ const userSchema = new mongoose.Schema({
     },
     passwordResetExpires: {
         type: Date
+    },
+    active: {
+        type: Boolean,
+        default: true,
+        select: false
     }
+})
+
+
+
+userSchema.pre(/^find/, function(next){
+    //Find users with active different from FALSE
+    this.find({active: {$ne: false} });
+    next();
 })
 
 

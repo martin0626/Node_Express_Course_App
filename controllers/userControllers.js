@@ -54,7 +54,14 @@ exports.updateUser = catchAsync( async(req, res, next)=>{
 
 
 
+exports.deleteUser = catchAsync(async(req, res, next)=>{
+    const user = await User.findByIdAndUpdate(req.user.id, {active: false});
 
+    res.status(204).json({
+        status: 'success',
+        data: null
+    })
+})
 
 
 
@@ -100,39 +107,3 @@ exports.getSingleUser = (req, res)=>{
     })
 };
 
-
-// exports.updateUser = (req, res)=>{
-//     let params = req.params;
-//     let user = users.filter((t)=>{return t._id == params.id})
-    
-//     user.length > 0 
-//     ?
-//     res.status(200).json({
-//         status: "Success",
-//         results: "Updated user Here",
-//     }) 
-//     :
-//     res.status(404).json({
-//         status: "Not found",
-//         message: "Invalid ID",
-//     })
-// };
-
-
-exports.deleteUser = (req, res)=>{
-    let params = req.params;
-    const usersLen = users.length;
-    let newUsers = users.filter((t)=>{return t._id != params.id})
-    
-    newUsers.length != usersLen
-    ?
-    res.status(204).json({
-        status: "Success",
-        results: null,
-    }) 
-    :
-    res.status(404).json({
-        status: "Not found",
-        message: "Invalid ID",
-    })
-};
